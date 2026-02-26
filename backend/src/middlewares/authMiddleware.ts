@@ -1,7 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-export const authenticateJWT = (req: Request, res: Response, next: NextFunction): void => {
+export interface AuthRequest extends Request {
+  user?: {
+    userId: string;
+    email: string;
+    role: string;
+  };
+}
+
+export const authenticateJWT = (req: AuthRequest, res: Response, next: NextFunction): void => {
   const authHeader = req.headers.authorization;
 
   if (authHeader) {
@@ -19,3 +27,12 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
     res.status(401).json({ error: "No se proporcionó token de autenticación" });
   }
 };
+
+export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {
+  if (req.user && req.user.role === "admin") {
+    next();
+  } else {
+    res.status(403).json({ error: "Acceso denegado, se requiere rol de administrador" });
+  }
+};
+

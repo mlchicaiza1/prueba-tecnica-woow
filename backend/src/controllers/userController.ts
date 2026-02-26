@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/userService";
+import { AuthRequest } from "../middlewares/authMiddleware";
 
 const userService = new UserService();
 
 export class UserController {
-  async getProfile(req: Request, res: Response) {
+  async getProfile(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
          res.status(401).json({ error: "No autenticado" });
@@ -17,7 +18,7 @@ export class UserController {
     }
   }
 
-  async updateProfile(req: Request, res: Response) {
+  async updateProfile(req: AuthRequest, res: Response) {
     try {
       if (!req.user) {
          res.status(401).json({ error: "No autenticado" });

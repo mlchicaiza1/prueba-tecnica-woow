@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/authService";
+import { RegisterRequestDto, LoginRequestDto } from "../dtos/authDto";
 
 const authService = new AuthService();
 
 export class AuthController {
   async register(req: Request, res: Response) {
     try {
-      const user = await authService.register(req.body);
+      const data: RegisterRequestDto = req.body;
+      const user = await authService.register(data);
       res.status(201).json({ message: "Usuario registrado exitosamente", user });
     } catch (error: any) {
       if (error.message === "Email is already registered") {
@@ -19,7 +21,8 @@ export class AuthController {
 
   async login(req: Request, res: Response) {
     try {
-      const result = await authService.login(req.body);
+      const data: LoginRequestDto = req.body;
+      const result = await authService.login(data);
       res.status(200).json(result);
     } catch (error: any) {
       if (error.message === "Invalid credentials") {

@@ -1,10 +1,12 @@
 import { findUserByEmail, createUser } from "../repositories/userRepository";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { RegisterRequestDto, LoginRequestDto, AuthResponseDto } from "../dtos/authDto";
+import { UserResponseDto } from "../dtos/userDto";
 
 export class AuthService {
 
-  async register(data: any) {
+  async register(data: RegisterRequestDto): Promise<UserResponseDto> {
     const existingUser = await findUserByEmail(data.email);
     if (existingUser) {
       throw new Error("Email is already registered");
@@ -20,7 +22,7 @@ export class AuthService {
     return userWithoutPassword;
   }
 
-  async login(data: any) {
+  async login(data: LoginRequestDto): Promise<AuthResponseDto> {
     const user = await findUserByEmail(data.email);
     if (!user) {
       throw new Error("Invalid credentials");
