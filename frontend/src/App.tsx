@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Profile } from "./pages/Profile";
+import { UsersList } from "./pages/UsersList";
+import { CreateUser } from "./pages/CreateUser";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -41,6 +43,8 @@ function App() {
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute><UsersList /></ProtectedRoute>} />
+          <Route path="/users/create" element={<ProtectedRoute><CreateUser /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
