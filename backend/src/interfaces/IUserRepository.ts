@@ -1,7 +1,8 @@
 import { User } from "../models/User";
+import { IFilterUser } from "./IFilterUser";
 
 export interface IUserRepository {
-  findAllUsers(): Promise<User[]>;
+  findAllUsers(options?: IFilterUser): Promise<[User[], number]>;
   findUserById(id: string): Promise<User | null>;
   findUserByEmail(email: string): Promise<User | null>;
   createUser(data: Partial<User>): Promise<User>;

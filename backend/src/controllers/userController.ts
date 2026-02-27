@@ -36,8 +36,16 @@ export class UserController {
 
   listUsers = async (req: Request, res: Response) => {
     try {
-      const users = await this.userService.listUsers();
-      res.status(200).json({ users });
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+      const filters = {
+        name: req.query.name as string | undefined,
+        email: req.query.email as string | undefined,
+        role: req.query.role as string | undefined,
+      };
+
+      const result = await this.userService.listUsers(page, limit, filters);
+      res.status(200).json(result);
     } catch (error: any) {
       res.status(500).json({ error: "Error interno del servidor" });
     }

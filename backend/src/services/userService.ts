@@ -3,6 +3,8 @@ import { injectable, inject } from "tsyringe";
 import { IUserRepository } from "../interfaces/IUserRepository";
 import { UpdateUserDTO } from "../dtos/UpdateUserDto";
 import bcrypt from "bcryptjs";
+import { IFilterUser } from "../interfaces/IFilterUser";
+import { IPaginatedResult } from "../interfaces/IPaginatedResult";
 @injectable()
 export class UserService {
 
@@ -24,8 +26,15 @@ export class UserService {
     return new UserResponseDTO(user);
   }
 
-  async listUsers(): Promise<UserResponseDTO[]> {
-    const users = await this.userRepository.findAllUsers();
-    return users.map(user => new UserResponseDTO(user));
+  async listUsers(page: number = 1, limit: number = 10, 
+    filters?: Omit<IFilterUser, 'skip' | 'take'>): Promise<IPaginatedResult<UserResponseDTO>> {
+    const skip = (page - 1) * limit;
+    const [users, total] = await this.userRepository.findAllUsers({ skip, take: limit, ...filters });
+    return {
+      data: users.map(user => new UserResponseDTO(user)),
+      total,
+      page,
+      totalPages: Math.ceil(total / limit)
+    };
   }
 }

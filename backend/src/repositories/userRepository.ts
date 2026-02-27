@@ -2,7 +2,8 @@ import { AppDataSource } from "../config/database";
 import { User, UserRole } from "../models/User";
 import { IUserRepository } from "../interfaces/IUserRepository";
 import { injectable } from "tsyringe";
-import { Repository } from "typeorm";
+import { Repository, ILike, FindOptionsWhere } from "typeorm";
+import { IFilterUser } from "../interfaces/IFilterUser";
 
 @injectable()
 export class UserRepository implements IUserRepository {
@@ -13,9 +14,18 @@ export class UserRepository implements IUserRepository {
     this.repository = AppDataSource.getRepository(User);
   }
 
-  async findAllUsers(): Promise<User[]> {
-    return await this.repository.find({
-      select: ["id", "name", "email", "role", "createdAt", "updatedAt"]
+  async findAllUsers(options?: IFilterUser): Promise<[User[], number]> {
+    const where: FindOptionsWhere<User> = {};
+    if (options?.name) where.name = ILike(`%${options.name}%`);
+    if (options?.email) where.email = ILike(`%${options.email}%`);
+    if (options?.role) where.role = options.role as UserRole;
+
+    return await this.repository.findAndCount({
+      select: ["id", "name", "email", "role", "createdAt", "updatedAt"],
+      where,
+      skip: options?.skip || 0,
+      take: options?.take || 10,
+      order: { createdAt: "DESC" }
     });
   }
   async findUserById(id: string): Promise<User | null> {
