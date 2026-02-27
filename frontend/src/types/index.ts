@@ -14,5 +14,5 @@ export interface AuthResponse {
 
 export interface ApiError {
   error: string;
-  errors?: any[];
+  errors?: Record<string, unknown>[];
 }

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../services/api";
+import axios from "axios";
 import { Layout } from "../components/Layout";
 
 export const Login: React.FC = () => {
@@ -11,7 +12,7 @@ export const Login: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setError("");
     
@@ -19,11 +20,15 @@ export const Login: React.FC = () => {
       const response = await api.post("/auth/login", { email, password });
       login(response.data);
       navigate("/profile");
-    } catch (err: any) {
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        if (err.response?.data?.error) {
+          setError(err.response.data.error);
+        } else {
+          setError("Error de conexión al servidor");
+        }
       } else {
-        setError("Error de conexión al servidor");
+        setError("Error desconocido");
       }
     }
   };

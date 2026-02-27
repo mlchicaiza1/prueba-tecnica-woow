@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import api from "../services/api";
+import axios from "axios";
 import { Layout } from "../components/Layout";
 
 export const Profile: React.FC = () => {
@@ -17,7 +18,7 @@ export const Profile: React.FC = () => {
     navigate("/login");
   };
 
-  const handleUpdate = async (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setError("");
     setSuccessMessage("");
@@ -26,8 +27,12 @@ export const Profile: React.FC = () => {
       updateUser(response.data.user);
       setSuccessMessage("Perfil actualizado exitosamente");
       setIsEditing(false);
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Error al actualizar");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.error || "Error al actualizar");
+      } else {
+        setError("Error desconocido");
+      }
     }
   };
 

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import axios from "axios";
 import { Layout } from "../components/Layout";
 
 export const CreateUser: React.FC = () => {
@@ -12,7 +13,7 @@ export const CreateUser: React.FC = () => {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
@@ -21,13 +22,17 @@ export const CreateUser: React.FC = () => {
       await api.post("/auth/register", { name, email, password, role });
       setSuccess(true);
       setTimeout(() => navigate("/users"), 2000);
-    } catch (err: any) {
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else if (err.response?.data?.errors) {
-        setError(err.response.data.errors.map((e: any) => e.msg).join(", "));
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        if (err.response?.data?.error) {
+          setError(err.response.data.error);
+        } else if (err.response?.data?.errors) {
+          setError(err.response.data.errors.map((e: { msg: string }) => e.msg).join(", "));
+        } else {
+          setError("Error de conexión al servidor");
+        }
       } else {
-        setError("Error de conexión al servidor");
+        setError("Error desconocido");
       }
     }
   };
