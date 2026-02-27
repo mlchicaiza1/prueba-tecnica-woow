@@ -1,14 +1,17 @@
 import { Request, Response } from "express";
 import { AuthService } from "../services/authService";
-import { RegisterRequestDto, LoginRequestDto } from "../dtos/authDto";
+import { LoginUserDTO } from "../dtos/authDto";
+import { injectable, inject } from "tsyringe";
+import { CreateUserDTO } from "../dtos/CreateUserDto";
 
-const authService = new AuthService();
-
+@injectable()
 export class AuthController {
-  async register(req: Request, res: Response) {
+  constructor(@inject("AuthService") private authService: AuthService) {}
+
+  register = async (req: Request, res: Response) => {
     try {
-      const data: RegisterRequestDto = req.body;
-      const user = await authService.register(data);
+      const data: CreateUserDTO = req.body;
+      const user = await this.authService.register(data);
       res.status(201).json({ message: "Usuario registrado exitosamente", user });
     } catch (error: any) {
       if (error.message === "Email is already registered") {
@@ -19,10 +22,10 @@ export class AuthController {
     }
   }
 
-  async login(req: Request, res: Response) {
+  login = async (req: Request, res: Response) => {
     try {
-      const data: LoginRequestDto = req.body;
-      const result = await authService.login(data);
+      const data: LoginUserDTO = req.body;
+      const result = await this.authService.login(data);
       res.status(200).json(result);
     } catch (error: any) {
       if (error.message === "Invalid credentials") {

@@ -1,12 +1,13 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/authController";
-import { registerValidation, loginValidation } from "../middlewares/authValidations";
-import { validateRequest } from "../middlewares/validateRequest";
-
+import { container } from "tsyringe";
+import { CreateUserDTO } from "../dtos/CreateUserDto";
+import { validationMiddleware } from "../middlewares/validationMiddleware";
+import { LoginUserDTO } from "../dtos/authDto";
 const router = Router();
-const authController = new AuthController();
+const authController = container.resolve(AuthController);
 
-router.post("/register", registerValidation, validateRequest, authController.register);
-router.post("/login", loginValidation, validateRequest, authController.login);
+router.post("/register", validationMiddleware(CreateUserDTO), authController.register);
+router.post("/login", validationMiddleware(LoginUserDTO), authController.login);
 
 export default router;

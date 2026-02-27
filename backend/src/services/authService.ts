@@ -1,45 +1,41 @@
-import { findUserByEmail, createUser } from "../repositories/userRepository";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { RegisterRequestDto, LoginRequestDto, AuthResponseDto } from "../dtos/authDto";
-import { UserResponseDto } from "../dtos/userDto";
+import { AuthResponseDTO, LoginUserDTO } from "../dtos/authDto";
+import { UserResponseDTO } from "../dtos/userResponseDto";
+import { generateToken } from "../config/jwt";
+import { inject, injectable } from "tsyringe";
+import { IUserRepository } from "../interfaces/IUserRepository";
+import { CreateUserDTO } from "../dtos/CreateUserDto";
 
+@injectable()
 export class AuthService {
 
-  async register(data: RegisterRequestDto): Promise<UserResponseDto> {
-    const existingUser = await findUserByEmail(data.email);
+  constructor( @inject("UserRepository") private userRepository: IUserRepository) {}
+
+  async register(data: CreateUserDTO): Promise<UserResponseDTO> {
+    const existingUser = await this.userRepository.findUserByEmail(data.email);
     if (existingUser) {
       throw new Error("Email is already registered");
     }
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    const user = await createUser({
-      name: data.name,
-      email: data.email,
+    const user = await this.userRepository.createUser({
+      ...data,
       password: hashedPassword,
-      role: data.role,
     });
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return new UserResponseDTO(user);
   }
 
-  async login(data: LoginRequestDto): Promise<AuthResponseDto> {
-    const user = await findUserByEmail(data.email);
+  async login(data: LoginUserDTO): Promise<AuthResponseDTO> {
+    const user = await this.userRepository.findUserByEmail(data.email);
     if (!user) {
       throw new Error("Invalid credentials");
     }
 
-    const isMatch = await bcrypt.compare(data.password, user.password);
-    if (!isMatch) {
+    const isPasswordValid = await bcrypt.compare(data.password, user.password);
+    if (!isPasswordValid) {
       throw new Error("Invalid credentials");
     }
 
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
-      process.env.JWT_SECRET || "secret_jwt_key_woow",
-      { expiresIn: "1d" }
-    );
-
-    const { password, ...userWithoutPassword } = user;
-    return { token, user: userWithoutPassword };
+    const token = generateToken(user.id, user.email, user.role);
+    return { token, user: new UserResponseDTO(user) };
   }
 }

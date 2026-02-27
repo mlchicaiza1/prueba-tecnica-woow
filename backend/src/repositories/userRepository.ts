@@ -1,34 +1,43 @@
 import { AppDataSource } from "../config/database";
 import { User, UserRole } from "../models/User";
+import { IUserRepository } from "../interfaces/IUserRepository";
+import { injectable } from "tsyringe";
+import { Repository } from "typeorm";
 
-export const userRepository = AppDataSource.getRepository(User);
+@injectable()
+export class UserRepository implements IUserRepository {
+
+  private repository: Repository<User>;
+
+  constructor() {
+    this.repository = AppDataSource.getRepository(User);
+  }
+
+  async findAllUsers(): Promise<User[]> {
+    return await this.repository.find({
+      select: ["id", "name", "email", "role", "createdAt", "updatedAt"]
+    });
+  }
+  async findUserById(id: string): Promise<User | null> {
+    return await this.repository.findOne({ where: { id } });
+  }
+  async findUserByEmail(email: string): Promise<User | null> {
+    return await this.repository.findOne({ where: { email } });
+  }
+  async createUser(data: Partial<User>): Promise<User> {
+    const userRole = data.role === UserRole.ADMIN ? UserRole.ADMIN : UserRole.USER;
+    const user = this.repository.create({ ...data, role: userRole });
+    return await this.repository.save(user);
+  }
+  async updateUser(id: string, data: Partial<User>): Promise<User | null> {
+    const user = await this.findUserById(id);
+    if (!user) return null;
+    await this.repository.update(id, data);
+    return await this.findUserById(id);
+  }
+}
 
 
-export const findAllUsers = async (): Promise<User[]> => {
-  return userRepository.find({
-    select: ["id", "name", "email", "role", "createdAt", "updatedAt"]
-  });
-};
-
-export const findUserById = async (id: string): Promise<User | null> => {
-  return userRepository.findOne({ where: { id } });
-};
-
-export const createUser = async (userData: Partial<User>): Promise<User> => {
-  const userRole = userData.role === UserRole.ADMIN ? UserRole.ADMIN : UserRole.USER;
-  const user = userRepository.create({ ...userData, role: userRole });
-  return userRepository.save(user);
-};
-
-export const updateUser = async (id: string, userData: Partial<User>): Promise<User | null> => {
-  const user = await findUserById(id);
-  if (!user) return null;
-  return userRepository.save({ ...user, ...userData });
-};
-
-export const findUserByEmail = async (email: string): Promise<User | null> => {
-  return userRepository.findOne({ where: { email } });
-};
 
 
 

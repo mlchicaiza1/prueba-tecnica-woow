@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { verifyToken } from "../config/jwt";
 
 export interface AuthRequest extends Request {
   user?: {
@@ -10,22 +10,25 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticateJWT = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  const authHeader = req.headers.authorization;
+  try {
+        const token = req.headers.authorization?.split(" ")[1];
+        
+        if (!token) {
+          res.status(401).json({ message: "Token no proporcionado" });
+            return;
+        }
 
-  if (authHeader) {
-    const token = authHeader.split(" ")[1];
+        const decoded = verifyToken(token);
+        if (!decoded) {
+          res.status(401).json({ message: "Token inválido" });
+            return;
+        }
 
-    jwt.verify(token, process.env.JWT_SECRET || "secret_jwt_key_woow", (err, user) => {
-      if (err) {
-        res.status(403).json({ error: "Token inválido o expirado" });
-        return;
-      }
-      req.user = user as any;
-      next();
-    });
-  } else {
-    res.status(401).json({ error: "No se proporcionó token de autenticación" });
-  }
+        req.user = decoded as any;
+        next();
+    } catch (error) {
+        res.status(401).json({ message: "Error de autenticación" });
+    }
 };
 
 export const requireAdmin = (req: AuthRequest, res: Response, next: NextFunction): void => {

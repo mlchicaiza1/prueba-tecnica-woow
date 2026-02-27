@@ -1,11 +1,11 @@
 import "reflect-metadata";
+import "./config/container";
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { AppDataSource } from "./config/database";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
-
 dotenv.config();
 
 const app = express();
