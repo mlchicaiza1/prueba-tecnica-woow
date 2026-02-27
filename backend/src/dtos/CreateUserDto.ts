@@ -13,6 +13,6 @@ export class CreateUserDTO {
     @IsNotEmpty({ message: "La contraseña es requerida" })
     password!: string;
 
-    @IsNotEmpty({ message: "El rol es requerido" })
+    
     role!: UserRole;
 }
