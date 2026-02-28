@@ -1,20 +1,20 @@
 # WoowTechnology - Prueba Técnica (Full-Stack)
 
-Este proyecto es una aplicación web Full-Stack construida para satisfacer los requerimientos de la prueba técnica solicitada por **WoowTechnology**. El sistema proporciona una REST API para la gestión de usuarios combinada con una SPA (Single Page Application) para consumirla de forma interactiva.
+Este proyecto es una aplicación web Full-Stack construida para satisfacer los requerimientos de la prueba técnica solicitada por **WoowTechnology**. El sistema proporciona una REST API para la gestión de usuarios combinada con una SPA (Single Page Application).
 
 ##  Prerrequisitos (Entorno Local)
 
-Para ejecutar este proyecto, necesitas tener instalados en tu máquina:
+Para ejecutar este proyecto, se necesita tener instalado en la máquina:
 
 - **Node.js** (v18.0 o superior)
-- **npm** (o yarn/pnpm equivalentemente)
-- **PostgreSQL** corriendo localmente, en red interna, o mediante un contenedor Docker.
+- **npm** o yarn/pnpm
+- **PostgreSQL** corriendo localmente o mediante un contenedor Docker.
 
 ## Base de Datos
 
-En este enfoque no se requiere un archivo de importación manual `schema.sql` porque **se ha implementado el uso del ORM moderno TypeORM** en el backend.
+No se requiere de archivo  `schema.sql` porque **se ha implementado ORM con TypeORM** en el backend.
 
-1. Abre tu administrador local de PostgreSQL (Ej. pgAdmin, o usando psql desde la CLI).
+1. Desde el administrador local de PostgreSQL (Ej. pgAdmin, o usando psql desde la CLI).
 2. Crea una base de datos vacía. Por defecto el proyecto buscará una base de nombre `woow_db`. 
    `CREATE DATABASE woow_db;`
 3. Al iniciar el servidor backend, el ORM se encarga por su cuenta de crear la tabla `users` automáticamente usando los modelos establecidos de TypeORM.
@@ -22,8 +22,6 @@ En este enfoque no se requiere un archivo de importación manual `schema.sql` po
 ---
 
 ## Ejecución con Docker Compose (Recomendado)
-
-O alternativamente, si prefieres ejecutar todo con contenedores:
 
 - **Docker** (v20.0 o superior)
 - **Docker Compose** (v2.0 o superior)
@@ -134,7 +132,7 @@ Todos los endpoints tienen el prefijo base `http://localhost:3000/api` y asumen 
   - Respuesta: Payload con Información de usuario y `token` JWT
 
 ### Cuentas Privadas (Requieren CABECERA HTTP `Authorization: Bearer <TOKEN>`)
-- `GET /users/me` (Obtener información de perfil del despachante).
+- `GET /users/me` (Obtener información de perfil del usuario logueado).
 - `PUT /users/me` (Actualizar el perfil).
   - Body de ejemplo: `{ "name": "Nuevo Nombre" }`
 - `GET /users` (Lista a todos los usuarios; *Únicamente el perfil debe contar con role="admin"*).
@@ -143,11 +141,11 @@ Todos los endpoints tienen el prefijo base `http://localhost:3000/api` y asumen 
 
 ## Credenciales de prueba
 
-Si te encuentras arrancando el proyecto por vez inicial y deseas testear el rol "Admin" o el rol "User", se recomienda fuertemente registrar ambos perfiles vía la propia API para asegurarse de que las contraseñas pasen por el filtro de factor hash en *bcryptjs*.
+Se recomienda registrar los perfiles de 'user' y 'admin' por el  API
 
-**Paso sugerido (Usando Postman, HTTPie o cURL):**
+**Paso sugerido (Usando Postman):**
 
-1. Como Administrador (Lanzar este registro en tu entorno HTTP contra POST /api/auth/register):
+1. Como Administrador (POST /api/auth/register):
 ```json
 {
   "name": "Administrador Woow",
@@ -156,8 +154,7 @@ Si te encuentras arrancando el proyecto por vez inicial y deseas testear el rol 
   "role": "admin"
 }
 ```
-2. Como Usuario Normal ("user" es rol por defecto):
-Ingresa a la vista web en `http://localhost:5173/register` y rellena el formulario tú mismo, o por REST:
+2. Como Usuario Normal (POST /api/auth/register):
 ```json
 {
   "name": "Usuario Tester",
